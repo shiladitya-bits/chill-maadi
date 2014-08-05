@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chill Maadi</title>
+    <script src="jquery.js" type="text/javascript"></script>
+    <script src="bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="jquery.watable.js" type="text/javascript" charset="utf-8"></script>
+    <link rel='stylesheet' href="bootstrap/css/bootstrap.min.css" />
+    <link rel='stylesheet' href='watable.css'/>
+    <style type="text/css">
+        body { padding: 30px; font-size: 12px }
+    </style>
+</head>
+<body>
+	<h2>Chill Maadi Table</h2>
+	<div id="div1" style="width:auto"></div>
+	<script type="text/javascript">
+		$(document).ready( function() {
+			var waTable = $('#div1').WATable({
+			pageSize: 15,
+            filter: true,               //Show filter fields
+            sorting: true,              //Enable sorting
+            sortEmptyLast:true,         //Empty values will be shown last
+            columnPicker: true,         //Show the columnPicker button
+			pageSizes: [],  //Set custom pageSizes. Leave empty array to hide button.
+            hidePagerOnEmpty: true,
+            //url: 'localhost/chillMaadi2/getData.php'    //Url to a webservice if not setting data manually as we do in this example
+            types: {                    //Following are some specific properties related to the data types
+                string: {
+                    //filterTooltip: "Giggedi..."    //What to say in tooltip when hoovering filter fields. Set false to remove.
+                    //placeHolder: "Type here..."    //What to say in placeholder filter fields. Set false for empty.
+                },
+                number: {
+                    decimals: 1   //Sets decimal precision for float types
+                },
+                bool: {
+                    //filterTooltip: false
+                },
+                date: {
+                  utc: true,            //Show time as universal time, ie without timezones.
+                  format: 'dd-MMM-yy',   //The format. See all possible formats here http://arshaw.com/xdate/#Formatting.
+                  datePicker: false      //Requires "Datepicker for Bootstrap" plugin (http://www.eyecon.ro/bootstrap-datepicker).
+                }
+            },
+			actions: {                //This generates a button where you can add elements.
+                filter: false,         //If true, the filter fields can be toggled visible and hidden.
+                columnPicker: false,   //if true, the columnPicker can be toggled visible and hidden.
+                custom: [             //Add any other elements here. Here is a refresh and export example.
+                  $('<a href="#" class="refresh"><span class="glyphicon glyphicon-refresh"></span>&nbsp;Refresh</a>')
+                ]
+            },
+
+            tableCreated: function(data) {    //Fires when the table is created / recreated. Use it if you want to manipulate the table in any way.
+            console.log('table created'); //data.table holds the html table element.
+            console.log(data);            //'this' keyword also holds the html table element.
+        },
+            rowClicked: function(data) {      //Fires when a row is clicked (Note. You need a column with the 'unique' property).
+                console.log('row clicked');   //data.event holds the original jQuery event.
+                console.log(data);            //data.row holds the underlying row you supplied.
+                                              //data.column holds the underlying column you supplied.
+                                              //data.checked is true if row is checked.
+                                              //'this' keyword holds the clicked element.
+                if ( $(this).hasClass('userId') ) {
+                  data.event.preventDefault();
+                  alert('You clicked userId: ' + data.row.userId);
+                }
+            },
+            columnClicked: function(data) {    //Fires when a column is clicked
+              console.log('column clicked');  //data.event holds the original jQuery event
+              console.log(data);              //data.column holds the underlying column you supplied
+                                              //data.descending is true when sorted descending (duh)
+            },
+            pageChanged: function(data) {      //Fires when manually changing page
+              console.log('page changed');    //data.event holds the original jQuery event
+              console.log(data);              //data.page holds the new page index
+            },
+            pageSizeChanged: function(data) {  //Fires when manually changing pagesize
+              console.log('pagesize changed');//data.event holds teh original event
+              console.log(data);              //data.pageSize holds the new pagesize
+            }
+        }).data('WATable');  //This step reaches into the html data property to get the actual WATable object. Important if you want a reference to it as we want here.
+  
+  		 //Generate some data
+       $.ajax({url:"http://localhost/chillMaadi2/getData.php",success:function(result){
+                result = JSON.parse(result);    
+                var data = getData(result);
+                waTable.setData(data, false);
+                }, error:function(xhr,status,error){
+
+                }});
+        //waTable.setData(data, true); //Sets the data but prevents any previously set columns from being overwritten
+        //waTable.setData(data, false, false); //Sets the data and prevents any previously checked rows from being reset
+
+		//Example event handler triggered by the custom refresh link above
+        $('body').on('.refresh', function(e) {
+            e.preventDefault();
+             $.ajax({url:"http://localhost/chillMaadi2/getData.php",success:function(result){
+                     result = JSON.parse(result); 
+                    var data = getData(result);
+                    waTable.setData(data, false);
+                },  error:function(xhr,status,error){
+
+                }});
+        });	
+
+	});
+
+	 //Generates some data. This step is of course normally done by your web server.
+    function getData(origRows) {	
+    	
+        var cols = {
+    		invoiceDate: {
+    			index:1,
+    			type:"string",
+    			friendly:"Invoice Date",
+                placeHolder:"Search",
+    			tooltip:"Invoice date"
+
+    		},
+
+    		dueDate: {
+    			index:2,
+    			friendly:"Due Date",
+    			type:"string",
+                placeHolder:"Search",
+                
+    			tooltip:"Due date"
+
+    		},
+
+    		partnerId : {
+    			index:3,
+    			type:"string",
+    			friendly:"Partner #",
+    			sorting:false,
+				tooltip:"Partner ID",
+                placeHolder:"Search"
+                
+    		},
+
+    		merchantName:{
+    			index:4,
+    			type:"string",
+    			friendly:"Merchant Name",
+    			sorting:false,
+    			tooltip:"Merchant Name",
+                placeHolder:"Search"
+                
+    		},
+
+    		accountManager : {
+    			index:5,
+    			type:"string",
+    			friendly:"Account Manager",
+    			filter:false,
+    			sorting:false,
+    			tooltip:"Account Manager",
+    		},
+
+    		city : {
+    			index:6,
+    			type:"string",
+    			friendly:"City",
+    			filter:false
+    		},
+
+    		salesforceContractNumber : {
+    			index:7,
+    			type:"string",
+    			friendly:"Salesforce Contract Number",
+    			sorting:false,
+    			filter:false
+
+    		},
+
+    		salesforceId : { 
+    			index:8,
+    			type:"string",
+    			friendly:"Salesforce ID",
+    			sorting:false,
+    			filter:false
+    		},
+
+    		paymentTerms : {
+    			index:9,
+    			type:"string",
+    			friendly:"Payment Terms",
+    			filter:false,
+    			sorting:false
+    		},
+
+    		paymentTermsOnSchedule : {
+    			index: 10,
+    			type:"string",
+ 		   		friendly:"Payment Terms on schedule",
+    			filter:false,
+    			sorting:false	
+    		},
+
+    		dealId : {
+    			index : 11,
+    			type:"string",
+    			friendly:"Deal ID",
+    			filter:false,
+    			sorting:false
+    		},
+
+    		glInvoiceId : {
+    			index : 12,
+    			type:"string",
+    			friendly:"GL Invoice ID",
+    			filter:false,
+    			sorting:false
+    		},
+
+    		glStatus : {
+	    		index : 13,
+    			type:"string",
+    			friendly:"GL Status",
+    			filter:false,
+    			sorting:false	
+    		},
+
+    		reasonCode:{
+	    		index : 14,
+    			type:"string",
+    			friendly:"Reason Code",
+    			filter:false,
+    			sorting:false		
+
+    		},
+
+    		amount : {
+				index : 15,
+    			type:"string",
+    			friendly:"Amount",
+    			filter:false,
+    			sorting:false		    			
+    		},
+
+    		
+    		collectedQty : {
+    			index : 16,
+    			type:"string",
+    			friendly:"Collected Quantity",
+    			filter:false,
+    			sorting:false		
+    		},
+
+    		redeemedQty : {
+    			index : 17,
+    			type:"string",
+    			friendly:"Redeemed Quantity",
+    			filter:false,
+    			sorting:false		
+    		},
+
+    		consumerPrice : {
+    			index : 18,
+    			type:"string",
+    			friendly:"Consumer Price",
+    			filter:false,
+    			sorting:false		
+    		},
+
+    		unitPrice : {
+    			index : 19,
+    			type:"string",
+    			friendly:"Unit Price",
+    			filter:false,
+    			sorting:false		
+    		},
+
+    		vat : {
+    			index : 20,
+    			type:"string",
+    			friendly:"VAT",
+    			filter:false,
+    			sorting:false		
+    		},
+
+    		cda : {
+				index : 21,
+    			type:"string",
+    			friendly:"CDA",
+                placeHolder:"Search",
+                
+    			sorting:false		
+    		},
+
+    		merchantVat : {
+    			index : 22,
+    			type:"string",
+    			friendly:"Merchant Pays VAT",
+    			filter:false,
+    			sorting:false		
+    		},
+    		vatExemption: {
+				index : 23,
+    			type:"string",
+    			friendly:"VAT Exemption",
+    			filter:false,
+    			sorting:false		
+    		},
+
+    		voucherCount : {
+    			index : 24,
+    			type:"string",
+    			friendly:"Voucher Count in invoice",
+    			filter:false,
+    			sorting:false		
+    		},
+
+    		paymentStatus : {
+    			index : 25,
+    			type: "string",
+    			friendly:"Payment status",
+                placeHolder:"Search"
+                
+    		},
+
+    		paymentDate : {
+    			index : 26,
+    			type:"date",
+                placeHolder:"Search",
+                
+    			friendly:"Payment Date"
+    		},
+
+    		amountAdjusted : {
+    			index : 27,
+    			type:"string",
+    			friendly:"Amount Adjusted",
+    			filter:false,
+    			sorting:false	
+    		},
+
+    		amountPaid : {
+    			index : 28,
+    			type:"string",
+    			friendly:"Amount Paid",
+    			filter:false,
+    			sorting:false	
+    		},
+
+    		issue: {
+    			index : 29,
+    			type:"string",
+    			friendly:"Issue",
+    			filter:false,
+    			sorting:false	
+    		},
+
+    		issueDate : {
+    			index : 30,
+    			type:"string",
+    			friendly:"Issue Date",
+    			filter:false,
+    			sorting:false	
+    		},
+
+    		issueStatus : {
+    			index : 31,
+    			type:"string",
+    			friendly:"Issue Status",
+    			filter:false,
+    			sorting:false	
+    		},
+
+    		resolveMessage : {
+    			index : 32,
+    			type:"string",
+    			friendly:"How resolved",
+    			filter:false,
+    			sorting:false	
+    		},
+
+    		txnReference : {
+    			index : 33,
+    			type:"string",
+    			friendly:"Txn Reference",
+    			filter:false,
+    			sorting:false	
+    		},
+
+    		cdaName : {
+    			index : 34,
+    			type:"string",
+    			friendly:"CDA Name",
+    			filter:false,
+    			sorting:false	
+    		},
+
+    		consumerPriceCda : {
+    			index : 35,
+    			type:"string",
+    			friendly:"Consumer Price",
+    			filter:false,
+    			sorting:false	
+    		}
+    	};
+
+
+		/*
+          Create the actual data.
+          Whats worth mentioning is that you can use a 'format' property just as in the column definition,
+          but on a row level. See below on how we create a weightFormat property. This will be used when rendering the weight column.
+          Also, you can pre-check rows with the 'checked' property and prevent rows from being checkable with the 'checkable' property.
+        */
+    	// var rows = [{
+    	// 				invoiceDate:Date.now(),dueDate:"1/1/94",partnerId:"11aa",merchantName:"maadi",accountManager:"chill",city:"bengaluru",salesforceContractNumber:"CM101",salesforceId:"CM101",paymentTerms:"[0,0]",paymentTermsOnSchedule:"[0,0]",dealId:"550403",glInvoiceId:"34232",glStatus:"sent",reasonCode:"done dana done",amount:"99.5",collectedQty:"4",redeemedQty:"2",consumerPrice:"1.4",unitPrice:"11",vat:"11",cda:"asdk232",merchantVat : "FALSE",vatExemption:"TRUE",voucherCount:"1",paymentStatus:"Y",paymentDate:"1/1/94",txnReference:"13dfaddf"
+    	// 			}, 
+    	// 			{
+    	// 				invoiceDate:"1/1/94",dueDate:"1/1/94",partnerId:"11aa",merchantName:"maadi",accountManager:"chill",city:"bengaluru",salesforceContractNumber:"CM101",salesforceId:"CM101",paymentTerms:"[0,0]",paymentTermsOnSchedule:"[0,0]",dealId:"550403",glInvoiceId:"34232",glStatus:"sent",reasonCode:"done dana done",amount:"99.5",collectedQty:"4",redeemedQty:"2",consumerPrice:"1.4",unitPrice:"11",vat:"11",cda:"asdk232",merchantVat : "FALSE",vatExemption:"TRUE",voucherCount:"1",paymentStatus:"Y",paymentDate:"1/1/94",txnReference:"13dfaddf"
+    	// 			}, 
+    	// 			{
+    	// 				invoiceDate:"1/1/93",dueDate:"1/1/94",partnerId:"11aa",merchantName:"maadi",accountManager:"chill",city:"bengaluru",salesforceContractNumber:"CM101",salesforceId:"CM101",paymentTerms:"[0,0]",paymentTermsOnSchedule:"[0,0]",dealId:"550403",glInvoiceId:"34232",glStatus:"sent",reasonCode:"done dana done",amount:"99.5",collectedQty:"4",redeemedQty:"2",consumerPrice:"1.4",unitPrice:"11",vat:"11",cda:"asdk232",merchantVat : "FALSE",vatExemption:"TRUE",voucherCount:"1",paymentStatus:"Y",paymentDate:"1/1/94",txnReference:"13dfaddf"
+    	// 			}];   	
+
+		//Create the returning object. Besides cols and rows, you can also pass any other object you would need later on.
+        // rows = [];
+        // for(var row in origRows){
+        //     if(origRows.hasOwnProperty(row)){                
+        //         rows.push(origRows[row]);
+        //     }
+        // }
+        var data = {
+            cols: cols,
+            rows: origRows
+        };
+    return data;
+
+	}
+
+
+	</script>
+</body>
+</html>
