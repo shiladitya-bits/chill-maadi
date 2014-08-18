@@ -81,7 +81,7 @@
         }).data('WATable');  //This step reaches into the html data property to get the actual WATable object. Important if you want a reference to it as we want here.
   
   		 //Generate some data
-       $.ajax({url:"http://localhost/chillMaadi2/getData.php",success:function(result){
+       $.ajax({url:"http://trestor.org/chillMaadi2/getData.php",success:function(result){
                 result = JSON.parse(result);    
                 var data = getData(result);
                 waTable.setData(data, false);
@@ -94,7 +94,7 @@
 		//Example event handler triggered by the custom refresh link above
         $('body').on('.refresh', function(e) {
             e.preventDefault();
-             $.ajax({url:"http://localhost/chillMaadi2/getData.php",success:function(result){
+             $.ajax({url:"http://trestor.org/chillMaadi2/getData.php",success:function(result){
                      result = JSON.parse(result); 
                     var data = getData(result);
                     waTable.setData(data, false);

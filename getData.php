@@ -1,7 +1,7 @@
 <?php 
 
-mysql_connect("localhost","root","root");
-mysql_select_db("payments");
+mysql_connect("localhost","root","trestor_goa_mumbai");
+mysql_select_db("test");
 $sql = "SELECT * from payment_log";
 $result=mysql_query($sql);
 
