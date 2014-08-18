@@ -12,6 +12,23 @@
     </style>
 </head>
 <body>
+   <form action="upload.php" method="post" name="import_excel">
+     
+    <div class="control-group">
+    <div class="controls">
+    <button type="submit" id="import" name="import" class="btn btn-primary button-loading" data-loading-text="Loading...">Import Excel data</button>
+    </div>
+    </div>
+    </form>
+    <br/>
+   <form action="export.php" method="post" name="export_excel">
+     
+    <div class="control-group">
+    <div class="controls">
+    <button type="submit" id="export" name="export" class="btn btn-primary button-loading" data-loading-text="Loading...">Export Data to Excel File</button>
+    </div>
+    </div>
+    </form>
 	<h2>Chill Maadi Table</h2>
 	<div id="div1" style="width:auto"></div>
 	<script type="text/javascript">
