@@ -1,4 +1,4 @@
 <?php
-$conn=mysql_connect("localhost","root","root") or die("Could not connect");
-mysql_select_db("payments",$conn) or die("could not connect database");
+$conn=mysql_connect("localhost","root","trestor_goa_mumbai") or die("Could not connect");
+mysql_select_db("test",$conn) or die("could not connect database");
 ?>
